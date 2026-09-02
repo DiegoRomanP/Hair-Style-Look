@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hair OpenAI Images"
+  short_description: "Integrate guarded hairstyle image editing"
+  default_prompt: "Use $hair-openai-images to implement this provider task."

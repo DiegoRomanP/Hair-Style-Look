@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hair MVP QA"
+  short_description: "Verify the MVP gates and privacy controls"
+  default_prompt: "Use $hair-mvp-qa to verify this MVP increment."

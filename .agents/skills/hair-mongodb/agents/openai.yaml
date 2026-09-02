@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hair MongoDB"
+  short_description: "Implement local MongoDB persistence safely"
+  default_prompt: "Use $hair-mongodb to design this MongoDB persistence task."

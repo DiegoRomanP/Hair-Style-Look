@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hair MVP Specification"
+  short_description: "Define the Hair Style Look MVP precisely"
+  default_prompt: "Use $hair-mvp-spec to refine this MVP requirement."
