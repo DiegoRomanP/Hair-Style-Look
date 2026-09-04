@@ -1,23 +1,51 @@
 # Hair Style Look
 
-MVP local B2B2C para que una peluqueria convierta la intencion de un cliente adulto en una simulacion de peinado y una ficha basica. No es un sistema listo para produccion.
+> Un MVP local para convertir una conversación con el estilista en una consulta
+> visual de peinado, con privacidad como condición de entrada.
 
-## Estado
+Hair Style Look explora un recorrido B2B2C para una peluquería piloto: una
+persona adulta llega desde un código QR, entiende y acepta el tratamiento de
+sus datos, comparte una foto frontal y define el cambio que busca. El objetivo
+es ayudar a cliente y estilista a acordar un look realizable; no sustituir su
+criterio profesional ni hacer diagnósticos.
 
-La Fase 0 de la fundacion Next.js/PWA esta verificada localmente con Node.js 24.19.0 y pnpm 11.22.0. Aun faltan el recorrido QR, cookie anonima, consentimiento bloqueante, MongoDB/GridFS, fotografia, worker, OpenAI Images, resultados persistentes y ficha.
+## Estado del proyecto
 
-La carpeta `supabase/` pertenece a una arquitectura anterior no integrada. No debe ampliarse; su retirada esta prevista despues de estabilizar el baseline.
+La **Fase 0** está implementada y comprobada: una base Next.js/PWA accesible,
+tipado estricto, endpoint de salud y controles de calidad locales. El producto
+no está listo para producción ni para fotografías de personas reales.
 
-## Stack decidido
+| Disponible hoy | Planificado para el MVP |
+| --- | --- |
+| Landing móvil, PWA, health check y pruebas base | QR, sesión anónima, consentimiento bloqueante, catálogo y cuestionario |
+| TypeScript estricto, Tailwind, Pino, Vitest y Playwright | MongoDB/GridFS, fotos privadas, resultados, descarga y eliminación |
+| CI sin secretos ni consumo de créditos | Worker local y OpenAI Images con presupuesto, idempotencia y límites |
 
-- Node.js `24.19.0` y pnpm `11.22.0`.
-- Next.js, React, TypeScript strict y Tailwind.
-- MongoDB Community local, driver oficial y GridFS.
-- OpenAI Images por defecto mediante un adaptador `ImageGenerationProvider`.
-- Worker Node local para jobs recuperables.
-- Vitest y Playwright.
+## Recorrido que se validará
 
-## Inicio actual
+```text
+QR del salón → sesión anónima → consentimiento → 3 respuestas → foto
+→ simulación visual → resultados persistentes → descarga o eliminación → ficha
+```
+
+El recorrido se construye de forma incremental. Las integraciones de MongoDB,
+GridFS y OpenAI Images están diseñadas, pero **aún no están implementadas**.
+
+## Tecnologías
+
+- **Aplicación:** Next.js (App Router), React y TypeScript estricto.
+- **Diseño y PWA:** Tailwind CSS, Web App Manifest y UI mobile-first.
+- **Validación y observabilidad:** Zod y Pino con redacción de datos sensibles.
+- **Calidad:** ESLint, Vitest, Testing Library y Playwright.
+- **Persistencia prevista:** MongoDB Community, driver oficial de Node.js y
+  GridFS.
+- **Generación prevista:** OpenAI Images detrás de un puerto
+  `ImageGenerationProvider` y un worker local.
+
+## Inicio rápido
+
+**Requisitos:** Node.js `24.19.0`, pnpm `11.22.0` y Corepack. Estas versiones
+están fijadas en el repositorio para asegurar resultados reproducibles.
 
 ```bash
 corepack enable
@@ -26,12 +54,14 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Aplicacion: `http://localhost:3000`  
-Salud: `GET /api/v1/health`
+Abre [http://localhost:3000](http://localhost:3000). El health check está en
+[`GET /api/v1/health`](http://localhost:3000/api/v1/health).
 
-MongoDB y OpenAI todavia no estan implementados. No hace falta configurar credenciales para verificar el baseline.
+No se requieren credenciales para ejecutar la Fase 0. Las variables de
+integraciones se añadirán únicamente junto con su primer consumidor y nunca
+deben versionarse.
 
-## Verificacion
+## Verificación
 
 ```bash
 pnpm lint
@@ -42,14 +72,54 @@ pnpm build
 pnpm test:e2e
 ```
 
-Los checks de la Fase 0 pasan sin MongoDB ni OpenAI. El primer commit sigue pendiente porque el filesystem actual no permite escribir el indice de Git.
+La CI ejecuta esta misma puerta sin secretos ni llamadas de pago.
 
-## Documentos
+## Principios de diseño
 
-- Especificacion tecnica: [`DevTech-MVP.md`](./DevTech-MVP.md)
-- Producto y mercado: [`Investigacion-Mercado.md`](./Investigacion-Mercado.md)
-- Instrucciones para agentes: [`AGENTS.md`](./AGENTS.md)
-- Handoff: [`Resumen-Para-Agente.md`](./Resumen-Para-Agente.md)
-- Plan multiagente: [`docs/agents/execution-plan.md`](./docs/agents/execution-plan.md)
-- Revision de skills y lanzamiento: [`docs/agents/skills-review.md`](./docs/agents/skills-review.md)
-- ADR de arquitectura: [`docs/architecture/decisions/0001-local-mongodb-openai-mvp.md`](./docs/architecture/decisions/0001-local-mongodb-openai-mvp.md)
+- **Privacidad antes de la foto:** no habrá acceso a catálogo, cámara o carga
+  sin consentimiento versionado.
+- **Límites claros:** sin menores, biometría, diagnóstico, entrenamiento propio
+  ni automatizaciones de contacto.
+- **Persistencia privada:** el diseño aprobado usará tokens opacos hasheados,
+  aislamiento por salón y sesión, y binarios fuera de documentos JSON.
+- **Coste controlado:** OpenAI Images tendrá un límite de USD 10 por entorno,
+  dos trabajos concurrentes por sesión y reintentos explícitos.
+- **Honestidad operativa:** los mensajes de error y rechazo serán plantillas
+  estáticas; no se presenta una maqueta como una integración terminada.
+
+## Arquitectura prevista
+
+```text
+Presentación / API → Aplicación → Dominio
+Infraestructura     → implementa puertos
+Worker local        → usa casos de uso y repositorios
+```
+
+Es un monolito modular: el dominio no dependerá de Next.js, MongoDB ni OpenAI.
+Cuando se implemente la persistencia, los repositorios deberán aplicar siempre
+el alcance de salón y sesión; GridFS utilizará estados intermedios y una
+reconciliación idempotente porque no ofrece transacciones multidocumento.
+
+## Privacidad y alcance
+
+Este repositorio es una demostración local. Antes de usar fotos reales se
+requiere una revisión humana de la normativa aplicable, el texto definitivo de
+consentimiento, la retención máxima, los roles de tratamiento y el soporte.
+
+La eliminación local prevista no equivale a eliminar contenido de servicios
+externos. Consulta el [inventario de datos](./docs/privacy/data-inventory.md) y
+la [política técnica de conservación](./docs/privacy/retention-policy.md).
+
+## Documentación
+
+- [Especificación técnica del MVP](./DevTech-MVP.md)
+- [Investigación de producto y mercado](./Investigacion-Mercado.md)
+- [Decisión de arquitectura: MongoDB y OpenAI Images](./docs/architecture/decisions/0001-local-mongodb-openai-mvp.md)
+- [Plan de ejecución por fases](./docs/agents/execution-plan.md)
+- [Guía para agentes](./AGENTS.md)
+
+## Próximo hito
+
+Implementar la persistencia y el acceso anónimo (Fase 1) con MongoDB Community,
+sesiones recuperables, consentimiento bloqueante y pruebas de aislamiento entre
+salones. La carga privada de fotos con GridFS es el siguiente hito (Fase 2).
