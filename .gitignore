@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies and package-manager state
 node_modules/
 .pnpm-store/
@@ -64,3 +65,18 @@ supabase/.temp/
 
 # Generated local knowledge graph
 graphify-out/
+=======
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+#videos
+**.mp4
+>>>>>>> 5a5ef0c (all docs)
